@@ -13,3 +13,5 @@
     - se podría usar la arquitectura o reentrenarlo con otro dataset
 
     - Segun la ia : resuelve un problema clásico de procesamiento de señal (detección de pitch y armónicos)
+
+// TODO probar el repo de referencia
