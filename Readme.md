@@ -15,9 +15,9 @@ El problema que se busca resolver es la falta de herramientas automatizadas y ac
 Para lograr la transcripción de una mezcla de audio compleja a notas musicales legibles, el proyecto plantea un *pipeline* basado en modelos de IA y procesamiento de señales (DSP):
 
 1. **Separación de Fuentes (Demucs):** El primer gran desafío en la transcripción automática de música es la interferencia entre instrumentos. Se utiliza el modelo **Demucs** de Meta para aislar pistas específicas (como la guitarra, voces o bajo) separándolas del resto de la canción.
-2. **Procesamiento de Señal (DSP):** Antes de intentar detectar las notas, la pista aislada es procesada con ecualización (filtros paso alto y paso bajo) y compuertas de ruido (Noise Gate). Esto limpia las frecuencias residuales de otros instrumentos que hayan quedado tras la separación.
+2. **Procesamiento de Señal (DSP):(Por investigar)** Antes de intentar detectar las notas, la pista aislada es procesada con ecualización (filtros paso alto y paso bajo) y compuertas de ruido (Noise Gate). Esto limpia las frecuencias residuales de otros instrumentos que hayan quedado tras la separación.
 3. **Extracción de Notas (Basic Pitch):** Una vez que el audio está purificado, se utiliza **Basic Pitch** (de Spotify). Este modelo analiza las frecuencias fundamentales y transcribe el audio crudo a un archivo MIDI.
-4. **Post-procesamiento Musical:** La transcripción directa suele contener errores (notas fantasma o duraciones irreales). La última fase del pipeline filtra mediante código las notas extremadamente cortas, resuelve solapamientos y fuerza (cuantiza) el resultado para que pertenezca a una escala musical teórica previamente definida, obteniendo un MIDI final limpio.
+4. **Post-procesamiento Musical:(Por investigar)** La transcripción directa suele contener errores (notas fantasma o duraciones irreales). La última fase del pipeline filtra mediante código las notas extremadamente cortas, resuelve solapamientos y fuerza (cuantiza) el resultado para que pertenezca a una escala musical teórica previamente definida, obteniendo un MIDI final limpio.
 
 ## [Placeholder] Arquitectura de la Aplicación Web
 *(Espacio reservado para documentar el diseño y la integración técnica entre el backend de procesamiento de audio y la interfaz web).*
