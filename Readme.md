@@ -1,135 +1,48 @@
 # Proyecto Acus — Transcripción y separación de audio con IA
 
-## Ideas
+## Ideas y Objetivos
 
-- Trabajar con pasajes sonoros?
+El objetivo principal de este proyecto es desarrollar una **aplicación web interactiva** que brinde a los usuarios la facilidad de aprender a tocar cualquier canción que tengan almacenada en su computadora. 
 
-- Transcripción Musical Automática Audio a MIDI 
-    - Tomar una grabación de audio (por ejemplo, una melodía tocada en guitarra o piano) y usar un modelo de IA que detecte las frecuencias fundamentales ($f_0$), las notas exactas y el tiempo en que se tocan, generando un archivo MIDI
-    - Dataset: MAPS Dataset o URMP (audio polifónico etiquetado nota por nota con MIDI).
-    - Se podría usar la arquitectura de Basic Pitch o reentrenarla con otro dataset
-    - Resuelve un problema clásico de procesamiento de señal (detección de pitch y armónicos)
+El problema que se busca resolver es la falta de herramientas automatizadas y accesibles para transcribir canciones arbitrarias. Al subir una canción a la plataforma, el sistema debe ser capaz de procesarla, extraer sus notas musicales y enseñarle al usuario cómo tocarla mientras el instrumento suena al unísono.
 
-## Pipeline
+> [!NOTE]
+> **Consideración sobre el Marco Legal:**
+> Existe una limitante respecto al marco legal relacionado con la procedencia de los archivos de audio de los usuarios (por ejemplo, descargas no oficiales o piratería). Sin embargo, este es un aspecto externo que no afecta el alcance técnico ni los objetivos académicos de este proyecto, cuyo foco central es la implementación tecnológica de Inteligencia Artificial y Procesamiento de Señales Digitales.
 
-El proyecto usa dos modelos de IA como etapas de un pipeline de limpieza y análisis de audio:
+## Metodología
 
-```
-Canciones/*.mp3
-      │
-      ▼  1. Demucs (Meta) — separación de pistas / limpieza de la mezcla
-separated/htdemucs/<canción>/{vocals,drums,bass,other}.wav
-      │
-      ▼  2. Basic Pitch (Spotify) — transcripción audio → MIDI
-MIDI/*_basic_pitch.mid
-      │
-      ▼  3. Scripts de análisis (pretty_midi)
-Notas, rangos, tempos, cromagrama...
-```
+Para lograr la transcripción de una mezcla de audio compleja a notas musicales legibles, el proyecto plantea un *pipeline* basado en modelos de IA y procesamiento de señales (DSP):
 
-La separación de stems actúa como filtro de limpieza: al aislar cada instrumento antes de transcribir, Basic Pitch detecta las notas con mucha menos interferencia de los demás instrumentos de la mezcla.
+1. **Separación de Fuentes (Demucs):** El primer gran desafío en la transcripción automática de música es la interferencia entre instrumentos. Se utiliza el modelo **Demucs** de Meta para aislar pistas específicas (como la guitarra, voces o bajo) separándolas del resto de la canción.
+2. **Procesamiento de Señal (DSP):** Antes de intentar detectar las notas, la pista aislada es procesada con ecualización (filtros paso alto y paso bajo) y compuertas de ruido (Noise Gate). Esto limpia las frecuencias residuales de otros instrumentos que hayan quedado tras la separación.
+3. **Extracción de Notas (Basic Pitch):** Una vez que el audio está purificado, se utiliza **Basic Pitch** (de Spotify). Este modelo analiza las frecuencias fundamentales y transcribe el audio crudo a un archivo MIDI.
+4. **Post-procesamiento Musical:** La transcripción directa suele contener errores (notas fantasma o duraciones irreales). La última fase del pipeline filtra mediante código las notas extremadamente cortas, resuelve solapamientos y fuerza (cuantiza) el resultado para que pertenezca a una escala musical teórica previamente definida, obteniendo un MIDI final limpio.
+
+## [Placeholder] Arquitectura de la Aplicación Web
+*(Espacio reservado para documentar el diseño y la integración técnica entre el backend de procesamiento de audio y la interfaz web).*
+
+## [Placeholder] Preguntas y Reflexiones
+*(Espacio reservado para documentar dudas, ideas o problemas que vayan surgiendo durante el desarrollo del ramo).*
+- *¿... ?*
+- *¿... ?*
 
 ## Instalación
 
-El repo incluye un `.venv` (Python 3.10) con todo instalado. Para recrearlo desde cero:
+El repositorio utiliza un entorno en Python 3.10. Para inicializar el proyecto y descargar las librerías necesarias para que funcionen los modelos (`basic-pitch` y `demucs`), sigue estos pasos:
 
 ```bash
+# 1. Crear y activar el entorno virtual
 python3.10 -m venv .venv
 source .venv/bin/activate
-pip install basic-pitch demucs pretty_midi numpy
-```
 
-## 1. Separación de pistas con Demucs (Meta)
-
-Repo: https://github.com/facebookresearch/demucs
-
-Separa una canción en 4 stems (voces, batería, bajo y otros) con el modelo `htdemucs`:
-
-```bash
-.venv/bin/demucs -n htdemucs -o separated "Canciones/<canción>.mp3"
-```
-
-Resultado:
-
-```
-separated/htdemucs/<canción>/
-├── vocals.wav
-├── drums.wav
-├── bass.wav
-└── other.wav
-```
-
-Opciones útiles:
-
-```bash
-# Solo separar voz del resto (más rápido)
-.venv/bin/demucs --two-stems vocals -o separated "Canciones/<canción>.mp3"
-
-# Forzar CPU si hay problemas con la GPU
-.venv/bin/demucs -d cpu -o separated "Canciones/<canción>.mp3"
-
-# Salida en mp3 en vez de wav
-.venv/bin/demucs --mp3 -o separated "Canciones/<canción>.mp3"
-
-# Listar todos los modelos disponibles
-.venv/bin/demucs --list-models
-```
-
-## 2. Transcripción a MIDI con Basic Pitch (Spotify)
-
-Repo: https://github.com/spotify/basic-pitch
-
-Transcribe un archivo de audio a MIDI. El primer argumento es la carpeta de salida:
-
-```bash
-.venv/bin/basic-pitch MIDI "separated/htdemucs/<canción>/bass.wav"
-```
-
-Genera `MIDI/bass_basic_pitch.mid` (el sufijo `_basic_pitch` se agrega automáticamente).
-
-Transcribir todos los stems de una canción de una vez:
-
-```bash
-.venv/bin/basic-pitch MIDI separated/htdemucs/<canción>/*.wav
-```
-
-Filtros de limpieza de la transcripción (umbrales):
-
-```bash
-# Más estricto: menos notas fantasma (útil con stems ruidosos)
-.venv/bin/basic-pitch MIDI --onset-threshold 0.6 --frame-threshold 0.4 \
-    --minimum-note-length 0.1 "separated/htdemucs/<canción>/bass.wav"
-
-# Restringir el rango de frecuencias (p.ej. solo graves para el bajo, en Hz)
-.venv/bin/basic-pitch MIDI --minimum-frequency 30 --maximum-frequency 300 \
-    "separated/htdemucs/<canción>/bass.wav"
-```
-
-## 3. Análisis del MIDI
-
-Con el MIDI generado, los scripts en `Scripts/` extraen información musical:
-
-```bash
-# Nota por nota: pitch, inicio, fin, velocity
-.venv/bin/python Scripts/analizador.py
-
-# Resumen completo: rango, duración, tempo, cromagrama
-.venv/bin/python Scripts/analisis_completo.py
-```
-
-(Ajustar la ruta del archivo `.mid` dentro de cada script según la canción procesada.)
-
-## Estructura del proyecto
-
-```
-├── Canciones/    # Audio de entrada (mp3)
-├── separated/    # Stems separados por Demucs
-├── MIDI/         # MIDIs generados por Basic Pitch
-└── Scripts/      # Análisis de los MIDIs con pretty_midi
+# 2. Instalar los modelos de IA y herramientas de manipulación de audio
+pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile
 ```
 
 ## Referencias
 
-- Basic Pitch (Spotify): https://github.com/spotify/basic-pitch
-- Demucs (Meta): https://github.com/facebookresearch/demucs
-- pretty_midi: https://github.com/craffel/pretty-midi
+- **Basic Pitch (Spotify):** Sistema eficiente para la Transcripción Musical Automática (Audio a MIDI). [Repositorio](https://github.com/spotify/basic-pitch)
+- **Demucs (Meta):** Arquitectura de separación de fuentes de música en stems. [Repositorio](https://github.com/facebookresearch/demucs)
+- **pretty_midi:** Herramienta para la manipulación y análisis de datos en formato MIDI usando Python. [Repositorio](https://github.com/craffel/pretty-midi)
+- **pedalboard (Spotify):** Librería para aplicar efectos de estudio y manipulación de señal en Python. [Repositorio](https://github.com/spotify/pedalboard)
