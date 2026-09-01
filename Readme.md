@@ -9,7 +9,7 @@ El objetivo de este proyecto es desarrollar un *pipeline* computacional que brin
 > **Consideración sobre el Marco Legal:**
 > Existe una limitante respecto al marco legal relacionado con la procedencia de los archivos de audio de los usuarios (por ejemplo, descargas no oficiales o piratería). Sin embargo, este es un aspecto externo que no afecta el alcance técnico ni los objetivos académicos de este proyecto, cuyo foco central es la implementación tecnológica de Inteligencia Artificial y Procesamiento de Señales Digitales.
 
-## Pregunta principal
+## Pregunta principal -> BUSCAR METRICAS DE FIDELIDAD
 **¿Qué nivel de fidelidad se puede alcanzar al transcribir automáticamente instrumentos de una mezcla a formato MIDI utilizando IA (Demucs + Basic Pitch), y de qué manera el procesamiento de señal (DSP) de las pistas aisladas permite reducir los errores y notas fantasma?**
 
 ## Motivación
@@ -74,4 +74,7 @@ pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile
 - **pedalboard (Spotify):** Librería para aplicar efectos de estudio (DSP). [Repositorio](https://github.com/spotify/pedalboard)
 
 ---
-> *Nota: La reestructuración y definición metodológica de este documento fue desarrollada con la asistencia de Gemini 3.1.*
+## Declaración de Uso de inteligencia artificial
+
+La reestructuración y definición metodológica de este documento fue desarrollada con la asistencia de Gemini 3.1. 
+Las ideas y conclusiones son del autor.
