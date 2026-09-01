@@ -2,3 +2,6 @@
 Canciones
 separated
 .venv/
+.ipynb_checkpoints/
+data/raw/
+data/interim/
