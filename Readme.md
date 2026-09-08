@@ -63,8 +63,12 @@ python3.10 -m venv .venv
 source .venv/bin/activate
 
 # 2. Instalar los modelos de IA y herramientas de manipulación de audio
-pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile
+pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile pyyaml librosa matplotlib
 ```
+
+### Dataset Requerido (Slakh)
+Para poder probar y evaluar la fidelidad de las transcripciones, este proyecto **requiere** el dataset **BabySlakh** (una versión reducida de Slakh2100). 
+Debes descargarlo desde [Zenodo (Registro 4603870)](https://zenodo.org/records/4603870) y descomprimirlo en la raíz del proyecto (asegurando que exista la carpeta `babyslakh_16k/`).
 
 ## Referencias
 
@@ -72,6 +76,7 @@ pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile
 - **Demucs (Meta):** Arquitectura de separación de fuentes de música en stems. [Repositorio](https://github.com/facebookresearch/demucs)
 - **pretty_midi:** Herramienta para manipulación MIDI. [Repositorio](https://github.com/craffel/pretty-midi)
 - **pedalboard (Spotify):** Librería para aplicar efectos de estudio (DSP). [Repositorio](https://github.com/spotify/pedalboard)
+- **Slakh / BabySlakh Dataset:** Dataset renderizado con pares de audio y MIDI alineados, requerido para evaluación. [Zenodo](https://zenodo.org/records/4603870)
 
 ---
 ## Declaración de Uso de inteligencia artificial
