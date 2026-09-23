@@ -2,3 +2,9 @@
 Canciones
 Data
 .venv
+.cache/
+babyslakh_16k/
+runs/babyslakh_remix/
+
+runs/
+babyslakh_remix/
