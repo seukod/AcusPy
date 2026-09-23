@@ -55,16 +55,17 @@ Para lograr la transcripción de una mezcla de audio compleja a notas musicales 
 
 ## Instalación
 
-El repositorio utiliza un entorno en Python 3.10. Para inicializar el proyecto y descargar las librerías necesarias:
+El repositorio utiliza Python 3.10 y `uv` para gestionar el entorno y las dependencias:
 
 ```bash
-# 1. Crear y activar el entorno virtual
-python3.10 -m venv .venv
-source .venv/bin/activate
+# 1. Crear el entorno virtual
+uv venv --python 3.10
 
-# 2. Instalar los modelos de IA y herramientas de manipulación de audio
-pip install basic-pitch demucs pretty_midi numpy pedalboard soundfile pyyaml librosa matplotlib
+# 2. Instalar las dependencias del proyecto
+uv pip install --python .venv/bin/python -r requirements.txt
 ```
+
+En VS Code, selecciona `.venv/bin/python` como intérprete y kernel del notebook.
 
 ### Dataset Requerido (Slakh)
 Para poder probar y evaluar la fidelidad de las transcripciones, este proyecto **requiere** el dataset **BabySlakh** (una versión reducida de Slakh2100). 
@@ -83,3 +84,6 @@ Debes descargarlo desde [Zenodo (Registro 4603870)](https://zenodo.org/records/4
 
 La reestructuración y definición metodológica de este documento fue desarrollada con la asistencia de Gemini 3.1. 
 Las ideas y conclusiones son del autor.
+
+
+GPT-5.6 luna**

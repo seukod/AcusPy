@@ -1,0 +1,20 @@
+# Entorno de notebooks
+ipykernel
+
+# Exploracion, visualizacion y procesamiento de audio
+numpy
+scipy
+librosa
+soundfile
+matplotlib
+pyyaml
+pretty_midi
+pedalboard
+pandas
+
+# Modelos de IA del pipeline
+basic-pitch
+demucs
+
+# Evaluacion de transcripcion musical
+mir_eval
