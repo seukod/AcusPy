@@ -1,4 +1,10 @@
 .DS_Store
 Canciones
 Data
-.venv
+.venv/
+data/
+.cache/
+
+src/
+__pycache__/
+runs/
