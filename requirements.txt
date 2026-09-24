@@ -1,15 +1,16 @@
 # Entorno de notebooks
 ipykernel
+setuptools<80
 
 # Exploracion, visualizacion y procesamiento de audio
-numpy
+numpy<2
 scipy
 librosa
 soundfile
 matplotlib
 pyyaml
 pretty_midi
-pedalboard
+pedalboard==0.9.21
 pandas
 
 # Modelos de IA del pipeline
