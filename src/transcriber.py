@@ -151,9 +151,15 @@ class NotePostProcessor:
                 if not (p_min <= pitch <= p_max):
                     continue
 
+            # Escalar velocidad a rango MIDI estándar [1, 127]
+            vel_127 = int(np.round(127 * velocity)) if velocity <= 1.0 else int(velocity)
+            vel_127 = max(1, min(127, vel_127))
+
             # Filtro 3: Velocidad mínima
-            if self.min_velocity is not None and velocity < self.min_velocity:
-                continue
+            if self.min_velocity is not None:
+                thresh_127 = int(np.round(127 * self.min_velocity)) if self.min_velocity <= 1.0 else int(self.min_velocity)
+                if vel_127 < thresh_127:
+                    continue
 
             # Filtro 4: Función personalizada
             if self.custom_filter is not None:
@@ -161,7 +167,7 @@ class NotePostProcessor:
                     "onset": onset,
                     "offset": offset,
                     "pitch": pitch,
-                    "velocity": velocity,
+                    "velocity": vel_127,
                 }
                 if not self.custom_filter(note_dict):
                     continue
@@ -182,8 +188,11 @@ class NotePostProcessor:
 
         instrument = pretty_midi.Instrument(program=program, is_drum=is_drum, name=name)
         for event in filtered_events:
+            raw_vel = event[3]
+            vel_127 = int(np.round(127 * raw_vel)) if raw_vel <= 1.0 else int(raw_vel)
+            vel_127 = max(1, min(127, vel_127))
             note = pretty_midi.Note(
-                velocity=int(event[3]),
+                velocity=vel_127,
                 pitch=int(event[2]),
                 start=float(event[0]),
                 end=float(event[1]),

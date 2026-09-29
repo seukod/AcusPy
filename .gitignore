@@ -5,6 +5,5 @@ Data
 data/
 .cache/
 
-src/
 __pycache__/
 runs/
