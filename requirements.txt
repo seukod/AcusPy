@@ -1,5 +1,6 @@
 # Entorno de notebooks
 ipykernel
+marimo>=0.25.1,<0.26
 setuptools<80
 
 # Exploracion, visualizacion y procesamiento de audio

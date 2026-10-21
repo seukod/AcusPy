@@ -21,7 +21,7 @@ import numpy as np
 import pretty_midi
 import soundfile as sf
 from basic_pitch import ICASSP_2022_MODEL_PATH
-from basic_pitch.inference import predict
+from basic_pitch.inference import Model, predict
 from pedalboard import HighpassFilter, LowpassFilter, NoiseGate, Pedalboard
 
 
@@ -390,11 +390,18 @@ class BasicPitchTranscriber:
     """
     def __init__(self, model_or_path=ICASSP_2022_MODEL_PATH):
         """
-        Inicializa y carga los pesos del modelo Basic Pitch una sola vez.
+        Configura Basic Pitch; carga los pesos una sola vez al transcribir.
         """
         self.model_path = model_or_path
+        self._model = model_or_path if isinstance(model_or_path, Model) else None
         self.sample_rate = 22050  # Frecuencia nativa de Basic Pitch
-        print(f"📦 [BasicPitchTranscriber] Modelo cargado: {self.model_path}")
+
+    @property
+    def model(self):
+        """Carga diferida: reutiliza una única instancia entre transcripciones."""
+        if self._model is None:
+            self._model = Model(self.model_path)
+        return self._model
 
     def transcribe(
         self,
@@ -460,14 +467,14 @@ class BasicPitchTranscriber:
             if pre_proc is not None or audio_path is None:
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                     temp_wav_path = tmp.name
-                sf.write(temp_wav_path, processed_audio, self.sample_rate)
+                sf.write(temp_wav_path, processed_audio, self.sample_rate, subtype="FLOAT")
                 inference_audio_path = temp_wav_path
             else:
                 inference_audio_path = audio_path
 
             model_output, raw_midi, raw_note_events = predict(
                 inference_audio_path,
-                model_or_model_path=self.model_path,
+                model_or_model_path=self.model,
             )
         finally:
             if temp_wav_path and os.path.exists(temp_wav_path):

@@ -12,8 +12,18 @@ from .transcriber import (
     get_audio_pipeline,
     get_note_pipeline,
 )
+from .demucs_transcriber import (
+    AudioArtifact, DemucsTranscriber, DSPVariant, SeparationResult, VariantResult,
+    available_devices,
+)
 
 __all__ = [
+    "AudioArtifact",
+    "available_devices",
+    "DemucsTranscriber",
+    "DSPVariant",
+    "SeparationResult",
+    "VariantResult",
     "AudioPreProcessor",
     "BasicPitchTranscriber",
     "NotePostProcessor",

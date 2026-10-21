@@ -6,4 +6,6 @@ data/
 .cache/
 
 __pycache__/
+notebooks/__marimo__/
+outputs/07_demucs/
 runs/

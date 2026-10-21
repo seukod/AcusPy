@@ -67,6 +67,39 @@ uv pip install --python .venv/bin/python -r requirements.txt
 
 En VS Code, selecciona `.venv/bin/python` como intérprete y kernel del notebook.
 
+### Comparador interactivo HT-Demucs / DSP / MIDI (Marimo)
+
+Desde la raíz del proyecto:
+
+```bash
+.venv/bin/marimo edit notebooks/07_demucs_dsp_marimo.py
+```
+
+El notebook permite seleccionar un fragmento, separar cuatro stems con `htdemucs`,
+comparar variantes DSP por etapa y visualizar los MIDI crudos y filtrados.
+Los botones controlan la separación, transcripción y exportación; cambiar filtros
+reutiliza la separación. La primera ejecución de Demucs necesita descargar sus pesos.
+El selector de dispositivo muestra `cpu` y las GPU detectadas: `mps` para Apple
+Silicon (M1/M2/…) y `cuda` para NVIDIA. CPU sigue siendo el valor predeterminado.
+Desde Python puedes usar `DemucsTranscriber(device="mps")` y consultar
+`src.available_devices()`. Esta selección afecta a Demucs; Basic Pitch conserva
+su backend independiente.
+Las exportaciones opcionales se guardan en `outputs/07_demucs/`, con WAV FLOAT,
+MIDI y un manifiesto de frecuencias. Los tiempos MIDI son relativos al fragmento.
+Para arrays estéreo, la API de `src.demucs_transcriber` usa `(canales, muestras)`;
+para mono, `(muestras,)`, y requiere indicar `sr` al separar un array.
+
+El selector STFT / Mel / log-Mel permite comparar las etapas con una referencia
+de energía común al stem sin DSP. Log-Mel es la vista inicial; cambiarla no
+ejecuta modelos ni modifica la transcripción.
+Después de transcribir, selecciona uno o varios MIDI alineados con el audio y
+pulsa **Evaluar benchmark** para obtener `F_no`, `F`, `Acc`, precisión, recall y
+deltas frente a `raw`. La referencia se recorta al fragmento elegido y la tabla
+se puede descargar desde Marimo. En BabySlakh, la tabla de metadatos ayuda a
+elegir las referencias: por ejemplo, bajo para `bass` y varios instrumentos para
+`other`. Si no hay notas de referencia en el fragmento, las métricas quedan sin
+calcular; los audios sin MIDI siguen permitiendo comparación visual y escucha.
+
 ### Dataset Requerido (Slakh)
 Para poder probar y evaluar la fidelidad de las transcripciones, este proyecto **requiere** el dataset **BabySlakh** (una versión reducida de Slakh2100). 
 Debes descargarlo desde [Zenodo (Registro 4603870)](https://zenodo.org/records/4603870) y descomprimirlo en la raíz del proyecto (asegurando que exista la carpeta `babyslakh_16k/`).
