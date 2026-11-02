@@ -30,20 +30,20 @@ cd AcusPy
 uv venv --python 3.10
 uv pip install --python .venv/bin/python -r requirements.txt
 
-.venv/bin/marimo edit notebooks/07_demucs_dsp_marimo.py
+.venv/bin/marimo edit notebooks/hito_02/07_demucs_dsp_marimo.py
 ```
 
 Marimo mostrará la dirección local en la terminal. Para abrir el comparador como aplicación, sin el editor de código:
 
 ```bash
-.venv/bin/marimo run notebooks/07_demucs_dsp_marimo.py
+.venv/bin/marimo run notebooks/hito_02/07_demucs_dsp_marimo.py
 ```
 
 Para detener el servidor, presiona **Ctrl+C**. La primera separación con Demucs necesita acceso a internet para descargar los pesos del modelo.
 
 ## Usar el comparador de Marimo
 
-El punto de entrada principal es [07_demucs_dsp_marimo.py](notebooks/07_demucs_dsp_marimo.py).
+El punto de entrada principal es [07_demucs_dsp_marimo.py](notebooks/hito_02/07_demucs_dsp_marimo.py).
 
 1. **Selecciona un audio** con el explorador de archivos y define el inicio y la duración del fragmento. Empieza con unos 10 segundos.
 2. **Elige el dispositivo** y pulsa **Separar con HT-Demucs**.
@@ -210,10 +210,10 @@ Desde Python, `engine.export()` genera los audios, los MIDI disponibles y el man
 | [src/demucs_transcriber.py](src/demucs_transcriber.py) | Separación, variantes DSP por stem, resultados intermedios y exportación. |
 | [src/benchmark.py](src/benchmark.py) | Carga y recorte de referencias, métricas y comparación de variantes. |
 | [src/spectral.py](src/spectral.py) | Representaciones STFT, Mel y log-Mel con escalas compartidas. |
-| [notebooks/01_auditoria_datos.ipynb](notebooks/01_auditoria_datos.ipynb) | Exploración y auditoría del dataset. |
-| [notebooks/02_benchmark_basic_pitch.ipynb](notebooks/02_benchmark_basic_pitch.ipynb) | Experimentos iniciales con Basic Pitch y DSP. |
-| [notebooks/06_benchmark_dsp.ipynb](notebooks/06_benchmark_dsp.ipynb) | Benchmark por instrumento sobre pistas aisladas de BabySlakh. |
-| [notebooks/07_demucs_dsp_marimo.py](notebooks/07_demucs_dsp_marimo.py) | Comparador interactivo de separación, DSP, transcripción y evaluación. |
+| [notebooks/hito_01/01_auditoria_datos.ipynb](notebooks/hito_01/01_auditoria_datos.ipynb) | Exploración y auditoría del dataset. |
+| [notebooks/hito_01/02_benchmark_basic_pitch.ipynb](notebooks/hito_01/02_benchmark_basic_pitch.ipynb) | Experimentos iniciales con Basic Pitch y DSP. |
+| [notebooks/hito_01/06_benchmark_dsp.ipynb](notebooks/hito_01/06_benchmark_dsp.ipynb) | Benchmark por instrumento sobre pistas aisladas de BabySlakh. |
+| [notebooks/hito_02/07_demucs_dsp_marimo.py](notebooks/hito_02/07_demucs_dsp_marimo.py) | Comparador interactivo de separación, DSP, transcripción y evaluación. |
 | [tests/](tests/) | Pruebas de orquestación, métricas y representaciones espectrales. |
 
 ## Pruebas
@@ -222,7 +222,7 @@ Desde la raíz del proyecto:
 
 ```bash
 .venv/bin/python -m unittest discover -s tests -v
-.venv/bin/marimo check --strict notebooks/07_demucs_dsp_marimo.py
+.venv/bin/marimo check --strict notebooks/hito_02/07_demucs_dsp_marimo.py
 ```
 
 Las pruebas automatizadas de orquestación simulan la inferencia para no descargar pesos. Cubren remuestreo, canales, etapas independientes, exportación, detección de dispositivos, referencias MIDI, tolerancias de evaluación y escalas espectrales. Las pruebas con modelos reales requieren los pesos de Demucs y un backend de Basic Pitch compatible con el equipo.

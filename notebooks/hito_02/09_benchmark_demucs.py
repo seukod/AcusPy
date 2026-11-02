@@ -18,7 +18,7 @@
 
 import marimo
 
-__generated_with = "0.25.2"
+__generated_with = "0.25.1"
 app = marimo.App(width="full")
 
 
@@ -34,7 +34,7 @@ def _():
     import numpy as np
     import yaml
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 

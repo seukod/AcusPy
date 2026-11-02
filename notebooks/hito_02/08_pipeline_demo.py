@@ -39,7 +39,7 @@ def _():
     import soundfile as sf
     from pedalboard import HighpassFilter, LowpassFilter, NoiseGate
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
