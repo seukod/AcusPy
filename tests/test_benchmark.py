@@ -10,6 +10,7 @@ import pretty_midi
 from src.benchmark import (
     METRIC_KEYS, benchmark_variants, crop_midi, evaluate_prediction,
     load_reference_midis, midi_to_frame_frequencies, midi_to_intervals_and_pitches,
+    transpose_midi,
 )
 
 
@@ -92,6 +93,19 @@ class BenchmarkTests(unittest.TestCase):
         intervals, _ = midi_to_intervals_and_pitches(combined)
         np.testing.assert_allclose(intervals, [(0, 0.5), (0.5, 1)])
         self.assertEqual(len(combined.instruments), 2)
+
+    def test_transpose_midi_shifts_pitch_without_mutating_input(self):
+        midi = make_midi([(0.1, 0.6, 50), (1.0, 1.5, 62)])
+        shifted = transpose_midi(midi, -12)
+        self.assertEqual([(n.start, n.end, n.pitch) for n in shifted.instruments[0].notes],
+                         [(0.1, 0.6, 38), (1.0, 1.5, 50)])
+        self.assertEqual([n.pitch for n in midi.instruments[0].notes], [50, 62])
+        self.assertTrue(transpose_midi(make_midi([(0.1, 0.6, 36)], is_drum=True),
+                                       12).instruments[0].is_drum)
+        with self.assertRaises(ValueError):
+            transpose_midi(midi, -60)
+        with self.assertRaises(ValueError):
+            transpose_midi(midi, -12.0)
 
     def test_frame_frequencies_are_unique_and_end_is_exclusive(self):
         midi = make_midi([(0, 0.02, 60), (0, 0.02, 60)])

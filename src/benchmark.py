@@ -57,6 +57,35 @@ def crop_midi(midi: pretty_midi.PrettyMIDI, start: float,
     return cropped
 
 
+def transpose_midi(midi: pretty_midi.PrettyMIDI,
+                   semitones: int) -> pretty_midi.PrettyMIDI:
+    """Copia el MIDI con las alturas desplazadas; no altera el original.
+
+    Conserva tiempos, velocidades, programa y bandera de percusión. Como la
+    copia de evaluación de ``crop_midi``, descarta pitch bends y automatizaciones.
+    Se usa para calibrar referencias cuyo render suena en otra octava, como el
+    bajo de BabySlakh (MIDI una octava por encima del audio).
+    """
+    if not isinstance(semitones, int):
+        raise ValueError("semitones debe ser un entero.")
+    shifted = pretty_midi.PrettyMIDI()
+    for instrument in midi.instruments:
+        target = pretty_midi.Instrument(program=instrument.program,
+                                        is_drum=instrument.is_drum,
+                                        name=instrument.name)
+        for note in instrument.notes:
+            pitch = note.pitch + semitones
+            if not 0 <= pitch <= 127:
+                raise ValueError(
+                    "La transposición deja alturas fuera del rango MIDI 0-127.")
+            target.notes.append(pretty_midi.Note(
+                velocity=note.velocity, pitch=pitch,
+                start=note.start, end=note.end))
+        if target.notes:
+            shifted.instruments.append(target)
+    return shifted
+
+
 def load_reference_midis(paths: Sequence[Union[str, Path]], start: float,
                          duration: float) -> pretty_midi.PrettyMIDI:
     """Combina los MIDI seleccionados y recorta su ventana absoluta una vez."""
