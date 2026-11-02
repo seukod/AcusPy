@@ -1,0 +1,21 @@
+track_id,grupo,stems_ref,inst_class,programas,evaluable
+Track00001,piano,S02,Piano,Bright Acoustic Piano,1
+Track00002,piano,S06,Piano,Clavinet,1
+Track00003,piano,S00,Piano,Bright Acoustic Piano,1
+Track00004,piano,S06+S07,Piano,Harpsichord; Acoustic Grand Piano,1
+Track00005,piano,S02+S06,Piano,Acoustic Grand Piano; Electric Piano 2,1
+Track00006,piano,S01,Piano,Electric Piano 1,1
+Track00007,piano,S01+S03+S08,Piano,Bright Acoustic Piano; Electric Piano 1; Bright Acoustic Piano,1
+Track00008,piano,S02+S05,Piano,Electric Piano 2; Acoustic Grand Piano,1
+Track00009,piano,S00,Piano,Bright Acoustic Piano,1
+Track00010,piano,S05,Piano,Honky-tonk Piano,1
+Track00011,piano,S02,Piano,Bright Acoustic Piano,1
+Track00012,piano,S03+S04,Piano,Honky-tonk Piano; Electric Piano 1,1
+Track00013,piano,S03,Piano,Electric Piano 1,1
+Track00014,piano,S05+S10+S11,Piano,Electric Piano 2; Honky-tonk Piano; Acoustic Grand Piano,1
+Track00015,piano,S00+S06,Piano,Bright Acoustic Piano; Acoustic Grand Piano,1
+Track00016,piano,S00+S10,Piano,Electric Piano 2; Acoustic Grand Piano,1
+Track00017,piano,S08,Piano,Honky-tonk Piano,1
+Track00018,piano,S07+S08+S09,Piano,Bright Acoustic Piano; Acoustic Grand Piano; Acoustic Grand Piano,1
+Track00019,piano,S01+S12,Piano,Electric Piano 1; Acoustic Grand Piano,1
+Track00020,piano,S03+S06,Piano,Acoustic Grand Piano; Electric Piano 1,1

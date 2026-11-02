@@ -1,0 +1,21 @@
+track_id,grupo,stems_ref,inst_class,programas,evaluable
+Track00001,guitar,S00+S07+S08,Guitar,Distortion Guitar; Electric Guitar (jazz); Distortion Guitar,1
+Track00002,guitar,S08,Guitar,Electric Guitar (muted),1
+Track00003,guitar,S02+S03+S04+S07+S08,Guitar,Acoustic Guitar (steel); Overdriven Guitar; Electric Guitar (jazz); Electric Guitar (clean); Acoustic Guitar (steel),1
+Track00004,guitar,S04,Guitar,Electric Guitar (muted),1
+Track00005,guitar,S01+S08+S13,Guitar,Acoustic Guitar (steel); Overdriven Guitar; Overdriven Guitar,1
+Track00006,guitar,S06+S10+S11,Guitar,Electric Guitar (clean); Electric Guitar (jazz); Overdriven Guitar,1
+Track00007,guitar,S04+S07,Guitar,Electric Guitar (clean); Electric Guitar (jazz),1
+Track00008,guitar,S03,Guitar,Electric Guitar (clean),1
+Track00009,guitar,S12,Guitar,Electric Guitar (muted),1
+Track00010,guitar,S01+S02,Guitar,Acoustic Guitar (steel); Acoustic Guitar (steel),1
+Track00011,guitar,S03+S04+S05+S06+S07,Guitar,Acoustic Guitar (steel); Acoustic Guitar (steel); Electric Guitar (clean); Overdriven Guitar; Overdriven Guitar,1
+Track00012,guitar,S01+S02,Guitar,Electric Guitar (muted); Electric Guitar (muted),1
+Track00013,guitar,S05,Guitar,Acoustic Guitar (steel),1
+Track00014,guitar,S02,Guitar,Acoustic Guitar (steel),1
+Track00015,guitar,S01,Guitar,Overdriven Guitar,1
+Track00016,guitar,S02+S03+S15,Guitar,Overdriven Guitar; Electric Guitar (jazz); Electric Guitar (jazz),1
+Track00017,guitar,S03+S06+S09,Guitar,Electric Guitar (jazz); Acoustic Guitar (steel); Distortion Guitar,1
+Track00018,guitar,S11+S14,Guitar,Acoustic Guitar (nylon); Overdriven Guitar,1
+Track00019,guitar,S09+S10,Guitar,Electric Guitar (clean); Overdriven Guitar,1
+Track00020,guitar,S04,Guitar,Electric Guitar (clean),1
