@@ -7,6 +7,10 @@ Un track que falla deja sus 4 filas con ``estado = "error: …"`` y se reintenta
 
 No carga modelos por sí mismo: recibe un ``runner`` (``make_runner`` en uso real, uno falso
 en los tests) con la firma ``runner(tg, start, duration, model) -> list[dict]``.
+
+La segunda parte arma, desde el CSV unido, las tablas del notebook 09 del Hito 2 sobre
+todos los tracks: track × variante con ``ΔF_no`` (``track_table``), medias por variante
+(``condition_means``) y cuántos tracks mejoran con PRE (``pre_vs_raw_counts``).
 """
 from __future__ import annotations
 
@@ -17,7 +21,7 @@ import time
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Callable, Iterable, Optional, Union
+from typing import Callable, Iterable, Optional, Sequence, Union
 
 from .hito3 import CONDITIONS, METRICS, RESULT_COLUMNS, TrackGroup, reference_transpose, run_conditions, write_rows
 
@@ -154,3 +158,76 @@ def merge_runs(out_dir: Union[str, Path], out_path: Union[str, Path]) -> Path:
             rows.extend(reader)
     rows.sort(key=lambda r: (r["track_id"], r["grupo"], order.get(r["condicion"], len(order))))
     return write_rows_atomic(rows, out_path)
+
+
+# ---------------------------------------------------------------------------
+# Benchmark sobre todos los tracks, en el formato del notebook 09 del Hito 2
+# ---------------------------------------------------------------------------
+
+# Nombres de variante del notebook 09, por clave de condición.
+VARIANT_NAMES = {
+    "raw": "Raw stem", "pre": "Pre-DSP only",
+    "post": "Post-DSP only", "prepost": "Pre-DSP + Post-DSP",
+}
+TABLE_METRICS = ("F_no", "F", "P_no", "R_no")
+ZERO_TOL = 1e-12
+
+
+def _valid(rows: Iterable[dict], metric: str) -> dict:
+    """``{(track, grupo): {condición: valor}}`` solo con filas ``ok`` y métrica presente."""
+    out = {}
+    for r in rows:
+        value = r.get(metric)
+        if r.get("estado") != "ok" or value in (None, ""):
+            continue
+        out.setdefault((r["track_id"], r["grupo"]), {})[r["condicion"]] = float(value)
+    return out
+
+
+def track_table(rows: Iterable[dict]) -> list[dict]:
+    """Una fila por track × variante, como la tabla del 09, con ``ΔF_no`` contra ``Raw stem``.
+
+    ``ΔF_no`` queda vacío si la variante o el ``Raw stem`` del mismo track no son ``ok``.
+    """
+    rows = list(rows)
+    order = {k: i for i, (k, *_) in enumerate(CONDITIONS)}
+    f_no = _valid(rows, "F_no")
+    out = []
+    for r in sorted(rows, key=lambda r: (r["track_id"], r["grupo"], order.get(r["condicion"], len(order)))):
+        by_cond = f_no.get((r["track_id"], r["grupo"]), {})
+        delta = (by_cond[r["condicion"]] - by_cond["raw"]
+                 if r["condicion"] in by_cond and "raw" in by_cond else None)
+        out.append({
+            "Track": r["track_id"], "Variante": VARIANT_NAMES.get(r["condicion"], r["condicion"]),
+            **{m: (None if r.get(m) in (None, "") else float(r[m])) for m in TABLE_METRICS},
+            "ΔF_no": delta, "Notas GT": r.get("n_ref"), "Notas predichas": r.get("n_pred"),
+            "estado": r["estado"],
+        })
+    return out
+
+
+def condition_means(rows: Iterable[dict], metrics: Sequence[str] = TABLE_METRICS) -> list[dict]:
+    """Media por variante sobre los tracks con las 4 condiciones ``ok`` (mismo conjunto)."""
+    import numpy as np
+
+    rows = list(rows)
+    keys = {k for k, *_ in CONDITIONS}
+    tables = {m: _valid(rows, m) for m in metrics}
+    complete = sorted(set.intersection(*({t for t, v in tables[m].items() if keys <= set(v)}
+                                         for m in metrics)))
+    return [{"Variante": VARIANT_NAMES[key], "n": len(complete),
+             **{m: (float(np.mean([tables[m][t][key] for t in complete])) if complete else None)
+                for m in metrics}}
+            for key, *_ in CONDITIONS]
+
+
+def pre_vs_raw_counts(rows: Iterable[dict]) -> dict:
+    """Cuántos tracks mejoran, empeoran o empatan en F_no con ``Pre-DSP only`` frente a ``Raw stem``."""
+    import numpy as np
+
+    table = _valid(rows, "F_no")
+    diffs = np.array([v["pre"] - v["raw"] for v in table.values() if "pre" in v and "raw" in v])
+    diffs[np.abs(diffs) <= ZERO_TOL] = 0.0
+    return {"n": len(diffs), "ΔF_no media": float(diffs.mean()) if len(diffs) else None,
+            "mejoran": int((diffs > 0).sum()), "empeoran": int((diffs < 0).sum()),
+            "empatan": int((diffs == 0).sum())}
