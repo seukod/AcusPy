@@ -170,6 +170,30 @@ def read_rows(path: Union[str, Path]) -> list[dict]:
     return rows
 
 
+def transcribe_stem(tg: TrackGroup, engine, pre_processor, start: float = 0.0,
+                     duration: Optional[float] = None, model: str = "htdemucs") -> tuple[dict, dict, float]:
+    """Separa ``mix.wav`` una vez y transcribe el stem del grupo sin y con PRE-DSP.
+
+    Devuelve ``(raw_t, pre_t, duracion_s)``, donde cada transcripción es el dict de
+    ``BasicPitchTranscriber.transcribe`` (sin POST-DSP: el POST se aplica después).
+    """
+    import librosa
+
+    if not tg.evaluable:
+        raise ValueError(f"{tg.track_id}/{tg.group} no es evaluable (faltan MIDI: {tg.missing_midi}).")
+    signal, sr = librosa.load(str(tg.mix_path), sr=None, mono=False, offset=start, duration=duration)
+    separation = engine.separate(signal, sr=sr)
+    if tg.group not in separation.stems:
+        raise ValueError(f"{model} no entregó el grupo {tg.group!r}.")
+    stem = separation.stems[tg.group].mono(SR_TRANSCRIPTION)
+
+    transcriber = engine.transcriber
+    raw_t = transcriber.transcribe(stem.audio, sr=SR_TRANSCRIPTION)
+    pre_audio = pre_processor.process(stem.audio.copy(), stem.sr)
+    pre_t = transcriber.transcribe(pre_audio, sr=SR_TRANSCRIPTION)
+    return raw_t, pre_t, separation.input_audio.duration
+
+
 def run_conditions(tg: TrackGroup, engine, pre_processor, post_processor,
                    start: float = 0.0, duration: Optional[float] = None,
                    model: str = "htdemucs", midi_dir: Optional[Union[str, Path]] = None) -> list[dict]:
@@ -180,23 +204,9 @@ def run_conditions(tg: TrackGroup, engine, pre_processor, post_processor,
     Si ``midi_dir`` se indica, guarda cada MIDI como ``<track>_<grupo>_<condicion>.mid``
     (los usa el notebook de análisis de errores).
     """
-    import librosa
-
     from .benchmark import evaluate_prediction, load_reference_midis, transpose_midi
 
-    if not tg.evaluable:
-        raise ValueError(f"{tg.track_id}/{tg.group} no es evaluable (faltan MIDI: {tg.missing_midi}).")
-    signal, sr = librosa.load(str(tg.mix_path), sr=None, mono=False, offset=start, duration=duration)
-    separation = engine.separate(signal, sr=sr)
-    if tg.group not in separation.stems:
-        raise ValueError(f"{model} no entregó el grupo {tg.group!r}.")
-    stem = separation.stems[tg.group].mono(SR_TRANSCRIPTION)
-    total = separation.input_audio.duration
-
-    transcriber = engine.transcriber
-    raw_t = transcriber.transcribe(stem.audio, sr=SR_TRANSCRIPTION)
-    pre_audio = pre_processor.process(stem.audio.copy(), stem.sr)
-    pre_t = transcriber.transcribe(pre_audio, sr=SR_TRANSCRIPTION)
+    raw_t, pre_t, total = transcribe_stem(tg, engine, pre_processor, start, duration, model)
 
     def post(t):
         return post_processor.process(t["raw_note_events"], base_midi=t["raw_midi"])[1]
@@ -223,4 +233,60 @@ def run_conditions(tg: TrackGroup, engine, pre_processor, post_processor,
             **{k: m[k] for k in METRICS}, "n_ref": m["Notas GT"], "n_pred": m["Notas predichas"],
             "estado": m["estado"],
         })
+    return rows
+
+
+# --- Auditoría del POST-DSP (notebook 02) -------------------------------------------
+
+# Basic Pitch descarta por su cuenta las notas más cortas que esto (``minimum_note_length``
+# por defecto de ``basic_pitch.inference.predict``, que ``src/`` no cambia).
+BASIC_PITCH_MIN_NOTE_S = 0.1277
+
+POST_REASONS = ("ninguno", "duracion", "tesitura", "velocidad")
+
+NOTE_COLUMNS = ("track_id", "grupo", "fuente", "onset_s", "offset_s", "duracion_s",
+                "pitch", "velocidad", "motivo")
+
+
+def post_reason(duration: float, pitch: int, vel_127: int, post) -> str:
+    """Qué filtro del ``NotePostProcessor`` elimina esta nota (uno de ``POST_REASONS``).
+
+    ``vel_127`` ya viene escalada a [1, 127], como la compara ``NotePostProcessor.process``.
+    """
+    if post.min_duration_sec is not None and duration  < post.min_duration_sec:
+        return "duracion"
+    
+    # Filtro 2: Rango de pitch (tesitura)
+    if post.pitch_range is not None:
+        p_min, p_max = post.pitch_range
+        if not (p_min <= pitch <= p_max):
+            return "tesitura"
+    
+    # Filtro 3: Velocidad mínima
+    if post.min_velocity is not None:
+        thresh_127 = int(round(127 * post.min_velocity)) if post.min_velocity <= 1.0 else int(post.min_velocity)
+        if vel_127 < thresh_127:
+            return "velocidad"
+    
+    return "ninguno"
+    
+
+
+
+def audit_post_dsp(tg: TrackGroup, transcriptions: dict, post_processor) -> list[dict]:
+    """Una fila por nota cruda de Basic Pitch con el motivo por el que el POST-DSP la elimina.
+
+    ``transcriptions`` mapea la fuente (``"raw"``, ``"pre"``) al dict de ``transcribe``.
+    Las filas siguen ``NOTE_COLUMNS``; se escriben con ``write_rows(..., NOTE_COLUMNS)``.
+    """
+    rows = []
+    for fuente, t in transcriptions.items():
+        for onset, offset, pitch, velocity, *_ in t["raw_note_events"]:
+            vel_127 = max(1, min(127, int(round(127 * velocity)) if velocity <= 1.0 else int(velocity)))
+            rows.append({
+                "track_id": tg.track_id, "grupo": tg.group, "fuente": fuente,
+                "onset_s": round(onset, 4), "offset_s": round(offset, 4),
+                "duracion_s": round(offset - onset, 4), "pitch": int(pitch), "velocidad": vel_127,
+                "motivo": post_reason(offset - onset, int(pitch), vel_127, post_processor),
+            })
     return rows
